@@ -16,23 +16,25 @@ $.fn.select2.amd.define('select2/data/extended-ajax',['./ajax','./tags','../util
     var originQuery = AjaxAdapter.prototype.query;
 
     ExtendedAjaxAdapter.prototype.query = function (params, callback) {
-        var defaultResults = (typeof this.defaultResults == 'function') ? this.defaultResults.call(this) : this.defaultResults;
-        if (defaultResults && defaultResults.length && (!params.term || params.term.length < this.minimumInputLength)){
-            var data = { results: defaultResults };
-            var processedResults = this.processResults(data, params);
-            callback(processedResults);
-        } else if (params.term && params.term.length >= this.minimumInputLength) {
-            originQuery.call(this, params, callback);
-        } else {
-            this.trigger('results:message', {
-                message: 'inputTooShort',
-                args: {
-                    minimum: this.minimumInputLength,
-                    input: '',
-                    params: params
-                }
-            });
-        }
+        (async() => {
+            var defaultResults = (typeof this.defaultResults == 'function') ? await this.defaultResults.call(this) : this.defaultResults;
+            if (defaultResults && defaultResults.length && (!params.term || params.term.length < this.minimumInputLength)){
+                var data = { results: defaultResults };
+                var processedResults = this.processResults(data, params);
+                callback(processedResults);
+            } else if (params.term && params.term.length >= this.minimumInputLength) {
+                originQuery.call(this, params, callback);
+            } else {
+                this.trigger('results:message', {
+                    message: 'inputTooShort',
+                    args: {
+                        minimum: this.minimumInputLength,
+                        input: '',
+                        params: params
+                    }
+                });
+            }
+        })()
     };
 
     if (module.config().tags) {
